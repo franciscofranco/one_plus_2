@@ -32,8 +32,10 @@
 #include <linux/pinctrl/consumer.h>
 
 #ifdef VENDOR_EDIT
+#ifdef CONFIG_OEM_FORCE_DUMP
 //hefaxi@filesystems, 2015/07/03, add for force dump function
 #include <linux/oem_force_dump.h>
+#endif
 #endif
 
 struct gpio_button_data {
@@ -337,8 +339,10 @@ static void gpio_keys_gpio_report_event(struct gpio_button_data *bdata)
 	int state = (gpio_get_value_cansleep(button->gpio) ? 1 : 0) ^ button->active_low;
 
 #ifdef VENDOR_EDIT
-//hefaxi@filesystems, 2015/07/03, add for force dump function
-    oem_check_force_dump_key(button->code,state);
+#ifdef CONFIG_OEM_FORCE_DUMP
+	//hefaxi@filesystems, 2015/07/03, add for force dump function
+	oem_check_force_dump_key(button->code,state);
+#endif
 #endif
 
 	if (type == EV_ABS) {

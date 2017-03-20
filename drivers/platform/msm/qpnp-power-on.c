@@ -36,8 +36,10 @@
 #endif
 
 #ifdef VENDOR_EDIT
+#ifdef CONFIG_OEM_FORCE_DUMP
 //hefaxi@filesystems, 2015/07/03, add for force dump function
 #include <linux/oem_force_dump.h>
+#endif
 #endif
 
 #define CREATE_MASK(NUM_BITS, POS) \
@@ -873,7 +875,9 @@ qpnp_pon_input_dispatch(struct qpnp_pon *pon, u32 pon_type)
 
 #ifdef VENDOR_EDIT
 //hefaxi@filesystems, 2015/07/03, add for force dump function
-    oem_check_force_dump_key(cfg->key_code,key_status);
+#ifdef CONFIG_OEM_FORCE_DUMP
+	oem_check_force_dump_key(cfg->key_code,key_status);
+#endif
 #endif
 	return 0;
 }

@@ -1847,10 +1847,6 @@ config ASN1
 
 source "kernel/Kconfig.locks"
 
-#add by jiachenghui for support oem trace,2015/05/09
-#ifdef VENDOR_EDIT
 config OEM_DEBUG_SUPORT
 	bool
-	default y
-#endif
-#end add by jiachenghui for support oem trace,2015/05/09
+	default n

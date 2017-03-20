@@ -67,7 +67,9 @@ void __weak panic_smp_self_stop(void)
 }
 //add by jiachenghui for support oem trace,2015/05/09
 #ifdef VENDOR_EDIT
+#ifdef CONFIG_OEM_TRACE_SUPORT
 extern bool is_otrace_on(void);
+#endif
 #endif  /*VENDOR_EDIT*/
 //end add by jiachenghui for support oem trace,2015/05/09
 
@@ -97,15 +99,20 @@ void panic(const char *fmt, ...)
 	local_irq_disable();
 //add by jiachenghui for support oem trace,2015/05/09
 #ifdef VENDOR_EDIT
-       pr_info("kernel panic because of %s\n", fmt);
+	pr_info("kernel panic because of %s\n", fmt);
+
+#ifdef CONFIG_OEM_TRACE_SUPORT
 	if(!is_otrace_on()) {
+#endif
              if (strcmp(fmt, "modem") == 0)
                   kernel_restart("modem");
              else if (strcmp(fmt, "android") == 0)
                   kernel_restart("android");
              else
                   kernel_restart("kernel");
+#ifdef CONFIG_OEM_TRACE_SUPORT
 	}
+#endif
 #endif  /*VENDOR_EDIT*/
 //end add by jiachenghui for support oem trace,2015/05/09
 

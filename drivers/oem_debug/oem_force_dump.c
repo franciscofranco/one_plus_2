@@ -10,6 +10,7 @@
 
 extern int oem_get_download_mode(void);
 
+#ifdef CONFIG_OEM_FORCE_DUMP
 /*
  * press the voluemup key and volumedown key, then
  * long press volumeup key, and at the same time,
@@ -80,3 +81,8 @@ void oem_check_force_dump_key(unsigned int code, int value)
         break;
     }
 }
+#else
+void oem_check_force_dump_key(unsigned int code, int value)
+{
+}
+#endif
