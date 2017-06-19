@@ -8159,7 +8159,7 @@ static void hdd_update_tgt_services(hdd_context_t *hdd_ctx,
     cfg_ini->fEnableTDLSSupport &= cfg->en_tdls;
     cfg_ini->fEnableTDLSOffChannel = cfg_ini->fEnableTDLSOffChannel &&
                                      cfg->en_tdls_offchan;
-    cfg_ini->fEnableTDLSBufferSta = cfg_ini->fEnableTDLSOffChannel &&
+    cfg_ini->fEnableTDLSBufferSta = cfg_ini->fEnableTDLSBufferSta &&
                                     cfg->en_tdls_uapsd_buf_sta;
     if (cfg_ini->fTDLSUapsdMask && cfg->en_tdls_uapsd_sleep_sta)
     {
@@ -13617,6 +13617,24 @@ VOS_STATUS hdd_set_sme_chan_list(hdd_context_t *hdd_ctx)
 {
     return sme_init_chan_list(hdd_ctx->hHal, hdd_ctx->reg.alpha2,
                               hdd_ctx->reg.cc_src);
+}
+
+void hdd_set_dfs_regdomain(hdd_context_t *phddctx, bool restore)
+{
+    if(!restore) {
+        if (vos_nv_get_dfs_region(&phddctx->hdd_dfs_regdomain)) {
+             hddLog(VOS_TRACE_LEVEL_FATAL,
+                    "%s: unable to retrieve dfs region from hdd",
+                    __func__);
+        }
+    }
+    else {
+        if (vos_nv_set_dfs_region(phddctx->hdd_dfs_regdomain)) {
+             hddLog(VOS_TRACE_LEVEL_FATAL,
+                    "%s: unable to set dfs region",
+                    __func__);
+        }
+    }
 }
 
 /**
