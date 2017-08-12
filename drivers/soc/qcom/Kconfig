@@ -622,17 +622,20 @@ config MSM_CORE_CTL_HELPER
 	  system load and state. It also supports limiting min and
 	  max online CPUs from userspace.
 
+config MSM_CORE_CTL
+	select MSM_CORE_CTL_HELPER
+	tristate "Core control driver to dynamically hotplug CPUs"
+	help
+	  Support for dynamicatlly hotplugging CPUs from kernel based on
+	  current system load and state. It also supports limiting min and
+	  max online CPUs from userspace.
+
 config MSM_PERFORMANCE
 	tristate "Core control driver to support userspace hotplug requests"
 	help
 	  This driver is used to provide CPU hotplug support to userspace.
 	  It ensures that no more than a user specified number of CPUs stay
 	  online at any given point in time.
-
-config ONEPLUS_HCUBE
-	tristate "Core control module by OnePlus"
-	help
-	  Add support for OnePlus modified Qualcomm core control module
 
 config QCOM_NPA_DUMP
 	bool "Read NPA dump from the RPM memory"
