@@ -79,24 +79,6 @@ static unsigned int sched_nr_latency = 8;
  */
 unsigned int sysctl_sched_child_runs_first __read_mostly;
 
-#ifdef VENDOR_EDIT
-enum thermal_aware_scheduling {
-	SCHED_TA_DISABLE,
-	SCHED_TA_THERMAL_ONLY,
-	SCHED_TA_ALWAYS_ON,
-};
-/*
- * Thermal-aware scheduling, prefer running on small cluster
- * when task loading on big cluster is below certain threshold
- *
- * Options:
- * SCHED_TA_DISABLE - Disable TA scheduling
- * SCHED_TA_THERMAL_ONLY - Only enable when under thermal constraint
- * SCHED_TA_ALWAYS_ON - Always enable TA scheduling
- */
-unsigned int __read_mostly sysctl_thermal_aware_scheduling = SCHED_TA_THERMAL_ONLY;
-#endif
-
 /*
  * Controls whether, when SD_SHARE_PKG_RESOURCES is on, if all
  * tasks go to idle CPUs when woken. If this is off, note that the
@@ -1684,16 +1666,6 @@ done:
 }
 
 static inline int is_cpu_throttling_imminent(int cpu);
-#ifdef VENDOR_EDIT
-void down_migrate_task(struct task_struct *p)
-{
-	if (p->ravg.mitigated)
-		return;
-
-	if (sysctl_thermal_aware_scheduling)
-		p->ravg.mitigated = 1;
-}
-#endif
 
 /*
  * Task will fit on a cpu if it's bandwidth consumption on that cpu
@@ -1709,19 +1681,10 @@ static int task_load_will_fit(struct task_struct *p, u64 tload, int cpu)
 	struct rq *prev_rq = cpu_rq(task_cpu(p));
 	struct rq *rq = cpu_rq(cpu);
 	int upmigrate, nice;
-#ifdef VENDOR_EDIT
-	int thermal_mitigation = 0;
-	int prev_cpu_throttled = 0, cpu_throttled = 0, ta_enabled = 0;
-	int prev_cpu = task_cpu(p);
-#endif
 
 	if (rq->capacity == max_capacity)
 		return 1;
 
-#ifdef VENDOR_EDIT
-	if (p->ravg.mitigated)
-		return 1;
-#endif
 	if (sched_boost()) {
 		if (rq->capacity > prev_rq->capacity)
 			return 1;
@@ -1731,34 +1694,10 @@ static int task_load_will_fit(struct task_struct *p, u64 tload, int cpu)
 			return 1;
 
 		upmigrate = sched_upmigrate;
-#ifdef VENDOR_EDIT
-		if (sysctl_thermal_aware_scheduling == SCHED_TA_THERMAL_ONLY) {
-			prev_cpu_throttled = is_cpu_throttling_imminent(prev_cpu);
-			cpu_throttled = is_cpu_throttling_imminent(cpu);
-			if (prev_cpu_throttled || cpu_throttled)
-				ta_enabled = 1;
-		} else if (sysctl_thermal_aware_scheduling == SCHED_TA_ALWAYS_ON)
-			ta_enabled = 1;
-
-		if (ta_enabled && cpu != prev_cpu
-		&& prev_rq->max_possible_capacity > rq->max_possible_capacity) {
-			thermal_mitigation = 1;
-			tload = scale_load_to_cpu(task_load(p), prev_cpu);
-		}
-#endif
-
-#ifdef VENDOR_EDIT
-		if (prev_rq->capacity > rq->capacity || thermal_mitigation)
-#else
 		if (prev_rq->capacity > rq->capacity)
-#endif
 			upmigrate = sched_downmigrate;
 
 		if (tload < upmigrate) {
-#ifdef VENDOR_EDIT
-			if (thermal_mitigation)
-				down_migrate_task(p);
-#endif
 			return 1;
 		}
 	}
@@ -1992,9 +1931,6 @@ static int skip_freq_domain(struct rq *task_rq, struct rq *rq, int reason)
 		break;
 
 	case EA_MIGRATION:
-#ifdef VENDOR_EDIT
-		if (!sysctl_thermal_aware_scheduling)
-#endif
 		skip = rq->capacity != task_rq->capacity;
 		break;
 
