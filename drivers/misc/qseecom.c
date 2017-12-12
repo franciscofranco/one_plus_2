@@ -4791,9 +4791,9 @@ static int __qseecom_qteec_issue_cmd(struct qseecom_dev_handle *data,
 	resp_ptr = req->resp_ptr;
 
 	req->req_ptr = (void *)__qseecom_uvirt_to_kvirt(data,
-						(uintptr_t)req->req_ptr);
+						(uintptr_t)req_ptr);
 	req->resp_ptr = (void *)__qseecom_uvirt_to_kvirt(data,
-						(uintptr_t)req->resp_ptr);
+						(uintptr_t)resp_ptr);
 
 	if ((cmd_id == QSEOS_TEE_OPEN_SESSION) ||
 			(cmd_id == QSEOS_TEE_REQUEST_CANCELLATION)) {
